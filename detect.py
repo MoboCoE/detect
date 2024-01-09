@@ -23,7 +23,6 @@ lowerLimit, upperLimit = get_limits(color=yellow)
 mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
 
 cv2.imshow("mask", mask)
-print(mask[:])
 
 # # grayscale
 # gray_img = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -58,8 +57,7 @@ for i in range(row):
             # print(array_img[i, 0])
             bf_array = array_img[i, index-1]
             af_array = array_img[i, index+1]
-            # print(index)
-            
+
             if j == 255 and bf_array == 255 and af_array == 255:
                 find_line.append(index)
                 # print(bf_array, j, af_array)
@@ -67,7 +65,7 @@ for i in range(row):
             find_line.append(index)
             
         index += 1
-    # print(find_line)
+
     if len(find_line) != 0:
         first_col = find_line[0]
         last_col = find_line[-1]
@@ -86,33 +84,16 @@ if len(x_axis) != 0 or len(y_axis) != 0:
     x = np.array(x_axis, dtype=float)
     y = np.array(y_axis, dtype=float)
 
-
-    # delete outlier
-    # z_scores = zscore(y)
-
-    # threshold = 3
-
-    # filtered_indices = np.where(np.abs(z_scores) < threshold)
-    # filtered_x = x[filtered_indices]
-    # filtered_y = y[filtered_indices]
-
     plt.scatter(x, y, label='Original Data')
 
     # find a, b
-    # if len(filtered_x) == 0 or len(filtered_y) == 0:
     a, b = np.polyfit(x, y, 1)
     print(f"true,{a},{b}")
 
     plt.plot(x, a*(x) + b, 'g')
     plt.grid()
     plt.show()
-    # else:
-    #     a, b = np.polyfit(filtered_x, filtered_y, 1)
-    #     print(f"true,{a},{b}")
 
-    #     plt.plot(filtered_x, a*(filtered_x) + b, 'r')
-    #     plt.grid()
-    #     plt.show()
 else:
     print(f"false,NaN,NaN")
 
