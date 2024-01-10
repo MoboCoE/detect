@@ -4,13 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import zscore
 from util import get_limits
+from line import follow_line
+
 
 img = cv2.imread("D:\mobile_robot\mobile_robot\camera\img.jpg")
 
 yellow = [0, 255, 255]
 
 # resize image
-scale_percent = 60 # percent of original size
+scale_percent = 50 # percent of original size
 width = int(img.shape[1] * scale_percent / 100)
 height = int(img.shape[0] * scale_percent / 100)
 dim = (width, height)
@@ -22,7 +24,7 @@ lowerLimit, upperLimit = get_limits(color=yellow)
 
 mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
 
-cv2.imshow("mask", mask)
+# cv2.imshow("mask", mask)
 
 # # grayscale
 # gray_img = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
@@ -83,12 +85,29 @@ for i in range(row):
 if len(x_axis) != 0 or len(y_axis) != 0:
     x = np.array(x_axis, dtype=float)
     y = np.array(y_axis, dtype=float)
+    
+    # delete outlier
+    z_scores = zscore(y)
+
+    threshold = 3
+
+    filtered_indices = np.where(np.abs(z_scores) < threshold)
+    filtered_x = x[filtered_indices]
+    filtered_y = y[filtered_indices]
 
     plt.scatter(x, y, label='Original Data')
 
     # find a, b
-    a, b = np.polyfit(x, y, 1)
-    print(f"true,{a},{b}")
+    if len(filtered_x) != 0 and len(filtered_y) != 0:
+        a, b = np.polyfit(filtered_x, filtered_y, 1)
+        print(f"true,{a},{b}")
+        right_speed, left_speed = follow_line(a, b)
+        print(f"Right: {right_speed} Left:{left_speed}")
+    else:
+        a, b = np.polyfit(x, y, 1)
+        print(f"true,{a},{b}")
+        right_speed, left_speed = follow_line(a, b)
+        print(f"Right: {right_speed} Left:{left_speed}")
 
     plt.plot(x, a*(x) + b, 'g')
     plt.grid()
