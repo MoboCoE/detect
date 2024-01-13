@@ -11,7 +11,7 @@ def send_data(left_speed, right_speed):
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1.0)  
    
     ser.reset_input_buffer()
-    message = f"{left_speed},{right_speed}\n"
+    message = f"{right_speed},{left_speed}\n"
     ser.write(message.encode('utf-8'))
 
 # note -> add header
