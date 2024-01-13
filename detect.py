@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import zscore
 from util import get_limits
-from line import follow_line
+from line import velocity
 
 
 img = cv2.imread("D:\mobile_robot\mobile_robot\camera\img.jpg")
@@ -13,8 +13,8 @@ yellow = [0, 255, 255]
 
 # resize image
 scale_percent = 50 # percent of original size
-width = int(img.shape[1] * scale_percent / 100)
-height = int(img.shape[0] * scale_percent / 100)
+width = 640
+height = 480
 dim = (width, height)
   
 resize_img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
@@ -51,7 +51,7 @@ middle_line = []
 x_axis = []
 y_axis = []
 
-for i in range(row):
+for i in range(0, row-1, 60):
     find_line = []
     index = 0
     for j in array_img[i, :]:
@@ -75,6 +75,7 @@ for i in range(row):
         center_zero_x = i - center_y
         center_zero_y = mid_col - center_x
         mid_point = [center_zero_x, center_zero_y] #(y,x)
+        # print(mid_point)
         # mid_point = [mid_col, i]
         middle_line.append(mid_point)
         x_axis.append(center_zero_x)
@@ -86,28 +87,31 @@ if len(x_axis) != 0 or len(y_axis) != 0:
     x = np.array(x_axis, dtype=float)
     y = np.array(y_axis, dtype=float)
     
-    # delete outlier
-    z_scores = zscore(y)
+    # # delete outlier
+    # z_scores = zscore(y)
 
-    threshold = 3
+    # threshold = 3
 
-    filtered_indices = np.where(np.abs(z_scores) < threshold)
-    filtered_x = x[filtered_indices]
-    filtered_y = y[filtered_indices]
+    # filtered_indices = np.where(np.abs(z_scores) < threshold)
+    # filtered_x = x[filtered_indices]
+    # filtered_y = y[filtered_indices]
 
-    plt.scatter(x, y, label='Original Data')
+    # plt.scatter(x, y, label='Original Data')
 
-    # find a, b
-    if len(filtered_x) != 0 and len(filtered_y) != 0:
-        a, b = np.polyfit(filtered_x, filtered_y, 1)
-        print(f"true,{a},{b}")
-        right_speed, left_speed = follow_line(a, b)
-        print(f"Right: {right_speed} Left:{left_speed}")
-    else:
-        a, b = np.polyfit(x, y, 1)
-        print(f"true,{a},{b}")
-        right_speed, left_speed = follow_line(a, b)
-        print(f"Right: {right_speed} Left:{left_speed}")
+    # # find a, b
+    # if len(filtered_x) != 0 and len(filtered_y) != 0:
+    #     a, b = np.polyfit(filtered_x, filtered_y, 1)
+    #     print(f"true,{a},{b}")
+    #     A = [filtered_x[0], filtered_y[0]]
+    #     B = [filtered_x[-1], filtered_y[-1]]
+    #     # print(A, B)
+    #     right_speed, left_speed = velocity("true", a, b)
+    #     print(f"Right: {right_speed} Left:{left_speed}")
+    # else:
+    a, b = np.polyfit(x, y, 1)
+    print(f"true,{a},{b}")
+    right_speed, left_speed = velocity("true", a, b)
+    print(f"Right: {right_speed} Left:{left_speed}")
 
     plt.plot(x, a*(x) + b, 'g')
     plt.grid()
@@ -115,4 +119,7 @@ if len(x_axis) != 0 or len(y_axis) != 0:
 
 else:
     print(f"false,NaN,NaN")
+    right_speed, left_speed = velocity("false", 0, 0)
+    print(f"Right: {right_speed} Left:{left_speed}")
+
 
