@@ -1,5 +1,5 @@
 import math
-from send_serial import get_serial, send_data
+from send_serial import send_data
 import time
 global state
 def velocity(status, x, y):
@@ -9,29 +9,30 @@ def velocity(status, x, y):
     base_speed = 120
     max_speed = 200
     k_slope = 50
-    maxline = 60
-    minline = 30
-    a = 30
+    maxline = 60 # max straight line
+    minline = 30 # min straight line
+    a = 30 # value's motor to left right of straight line
 
     if status == "true":
-        state = 0
-
+        # straight line
         if (slope < 0 and intersect < 0) or (slope > 0 and intersect > 0):
+            # straight on
             if -1 < slope < 1 and minline <= intersect <= maxline:
                 right_speed = base_speed
                 left_speed = base_speed
                 print("ตรง")
                 print(left_speed, right_speed)
                 
-                
+            # b is not in range maxline and minline
             elif intersect > maxline or intersect < minline:
+                # the robot is to the left of the line
                 if intersect > maxline:
-                    
-                    send_data(intersect*10, 0)
+                    send_data(intersect*10, 0) #left, right
                     print("เลี้ยวขวาตรง", intersect)
                     right_speed = 0
                     left_speed = a
                     
+                # the robot is to the right of the line.
                 if intersect < minline:
                     if intersect<0:
                         intersect = -intersect-minline
@@ -39,13 +40,14 @@ def velocity(status, x, y):
                     print("เลี้ยวซ้ายตรง", intersect)
                     right_speed = a
                     left_speed = 0
-
+        # turn left
         elif slope > 0 and intersect < 0:
             right_speed = 80 + k_slope*slope + (-intersect)/60
             left_speed = 80 - k_slope*slope - (-intersect)/20
             print("เลี้ยวซ้าย")
             print(left_speed, right_speed)
 
+        # turn right
         elif slope < 0 and intersect > 0:
             slope = -slope
             right_speed = 80 - k_slope*slope - intersect/60
