@@ -6,14 +6,15 @@ from send_serial import get_serial, send_data
 import time
 
 def find_line(mask):
-    start = time.time()
-    # get_serial()
 
     # change image to array
     array_img = asarray(mask)
 
+    # find length of column and row image
     col = len(array_img[0, :])
     row = len(array_img[:, 0])
+
+    #find center of image from row and column
     center_x = col/2
     center_y = row/2
 
@@ -21,35 +22,35 @@ def find_line(mask):
     x_axis = []
     y_axis = []
 
-    for i in range(0, row-1, 10):
-        find_line = []
-        index = 0
+    # scan rows every 90 row
+    for i in range(0, row-1, 90):
+        find_line = [] # collect the scanned point 
+        index = 0 # number of index
+        # scan row
         for j in array_img[i, :]:
-            if index > 0 and index < col-1:
-                # print(array_img[i, 0])
-                bf_array = array_img[i, index-1]
-                af_array = array_img[i, index+1]
-                # print(index)
-                
-                if j == 255 and bf_array == 255 and af_array == 255:
+            if index > 0 and index < col-1: # not first index and last index
+                bf_array = array_img[i, index-1] # value before array
+                af_array = array_img[i, index+1] # value after array
+                # j is value now
+                if j == 255 and bf_array == 255 and af_array == 255: # before array, last array and j are white
                     find_line.append(index)
-                    # print(bf_array, j, af_array)
-            if j == 255 and index == 0:
+            if j == 255 and index == 0: # first index j is white 
                 find_line.append(index)
-
+            index += 1
+        
         if len(find_line) != 0:
+            # choose first and last point to find mid-line
             first_col = find_line[0]
             last_col = find_line[-1]
             mid_col = (first_col+last_col)/2
+            # transpose x and y
             center_zero_x = i - center_y
             center_zero_y = mid_col - center_x
             mid_point = [center_zero_x, center_zero_y] #(y,x)
-            # mid_point = [mid_col, i]
             middle_line.append(mid_point)
             x_axis.append(center_zero_x)
             y_axis.append(center_zero_y)
-        
-    #print(x_axis)
+
     if len(x_axis) != 0 or len(y_axis) != 0:
         x = np.array(x_axis, dtype=float)
         y = np.array(y_axis, dtype=float)
@@ -83,5 +84,3 @@ def find_line(mask):
     
     send_data(left_speed, right_speed)
 
-    end = time.time()
-    # print("find mid line(s):", end-start)
